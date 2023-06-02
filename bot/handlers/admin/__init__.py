@@ -1,1 +1,2 @@
-from .other import register_admin_handlers
+from .other import register_admin_other_handlers
+from .admin import register_admin_handlers
