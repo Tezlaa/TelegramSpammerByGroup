@@ -1,0 +1,1 @@
+from .other import register_admin_handlers
