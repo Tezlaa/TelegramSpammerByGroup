@@ -3,9 +3,12 @@ import datetime
 import logging
 
 from bot.types import TextFromDatabase
+
+
+class DatabaseConfig:
+    """ Create connect and cursor for database,
+        this is base class """
     
-    
-class Database:
     def __init__(self, database_name: str) -> None:
         self.connect = sqlite3.connect(database_name)
         
@@ -16,26 +19,18 @@ class Database:
             return
         
         self.cur = self.connect.cursor()
-        self.create_main_database()
-        self.create_delay_database()
+        
+
+class TextToSubmit(DatabaseConfig):
+    """ Interface for settings texts in the database,
+        CURD class: can do Create, Update, Read, Delete
+        """
     
     def create_main_database(self) -> None:
         self.cur.execute("""CREATE TABLE IF NOT EXISTS telegram_spammer(
             id INTEGER PRIMARY KEY,
             message TEXT)""")
         
-        self.connect.commit()
-    
-    def create_delay_database(self) -> None:
-        self.cur.execute("""CREATE TABLE IF NOT EXISTS delay(
-            delay INT,
-            last_send timestamp)""")
-        
-        if not self.cur.execute("SELECT * FROM delay").fetchone():
-            #  set default delay: 12h / last_send: now
-            self.cur.execute("INSERT INTO delay VALUES(?, ?)", (60 * 60 * 12,
-                                                                datetime.datetime.now()))
-            
         self.connect.commit()
     
     def get_text_by_id(self, id: int) -> TextFromDatabase:
@@ -71,9 +66,32 @@ class Database:
         self.connect.commit()
         return id
     
+
+class TimerForSendingMessage(DatabaseConfig):
+    def create_delay_database(self) -> None:
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS delay(
+            delay INT,
+            last_send timestamp)""")
+        
+        if not self.cur.execute("SELECT * FROM delay").fetchone():
+            #  set default delay: 12h / last_send: now
+            self.cur.execute("INSERT INTO delay VALUES(?, ?)", (60 * 60 * 12,
+                                                                datetime.datetime.now()))
+            
+        self.connect.commit()
+    
     def update_delay(self, time_in_seconds: int) -> int:
         """ Update delay in the database.
             Return: time_in_seconds"""
         
         self.cur.execute("UPDATE dalay SET time_in_seconds = ?", (time_in_seconds, ))
         return time_in_seconds
+    
+
+class Database(TextToSubmit, TimerForSendingMessage):
+    """ Create database and CRUD all table """
+    def __init__(self, database_name: str) -> None:
+        super().__init__(database_name)
+        
+        self.create_main_database()
+        self.create_delay_database()
