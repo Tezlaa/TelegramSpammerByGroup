@@ -11,7 +11,7 @@ async def __on_start_up(dp: Dispatcher) -> None:
     register_all_handlers(dp)
 
 
-def start_bot():
+def start_bot():    
     bot = Bot(token=settings.TELEGRAM_TOKEN, parse_mode='HTML')
     dp = Dispatcher(bot, storage=MemoryStorage())
     

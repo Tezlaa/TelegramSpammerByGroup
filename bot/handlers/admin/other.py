@@ -4,12 +4,21 @@ import bot.settings as settings
 from bot.keyboards.inline import admin_menu
 
 
-async def start(msg: types.Message):
-    if str(msg.from_id) not in settings.ADMINS_ID:
-        return
+async def start(msg_call: types.Message | types.CallbackQuery):
+
+    if isinstance(msg_call, types.CallbackQuery):
+        if str(msg_call.from_user.id) not in settings.ADMINS_ID:
+            return
+        await msg_call.message.delete()
+        
+        msg_call = msg_call.message
+    else:
+        if str(msg_call.from_id) not in settings.ADMINS_ID:
+            return
     
-    await msg.answer('Админ Панель', reply_markup=admin_menu)
+    await msg_call.answer('Админ Панель', reply_markup=admin_menu)
 
 
 def register_admin_other_handlers(dp: Dispatcher):
+    dp.register_callback_query_handler(start, text='start_menu')
     dp.register_message_handler(start, commands=['start'])
