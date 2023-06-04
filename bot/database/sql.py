@@ -1,8 +1,9 @@
+import pytz
 import sqlite3
-import datetime
 import logging
+from datetime import datetime
 
-from bot.types import TextFromDatabase
+from bot.types import TextFromDatabase, DelayFromDatabase
 
 
 class DatabaseConfig:
@@ -76,17 +77,32 @@ class TimerForSendingMessage(DatabaseConfig):
         if not self.cur.execute("SELECT * FROM delay").fetchone():
             #  set default delay: 12h / last_send: now
             self.cur.execute("INSERT INTO delay VALUES(?, ?)", (60 * 60 * 12,
-                                                                datetime.datetime.now()))
+                                                                datetime.now(tz=pytz.timezone('Europe/Kyiv'))))
             
         self.connect.commit()
     
+    def get_delay(self) -> DelayFromDatabase:
+        """ get delay and time of last shipment """
+        
+        data = self.cur.execute("SELECT * FROM delay").fetchone()
+        return DelayFromDatabase(delay_in_second=data[0], last_send=data[1])
+        
     def update_delay(self, time_in_seconds: int) -> int:
         """ Update delay in the database.
             Return: time_in_seconds"""
         
-        self.cur.execute("UPDATE dalay SET time_in_seconds = ?", (time_in_seconds, ))
+        self.cur.execute("UPDATE delay SET delay = ?", (time_in_seconds, ))
+        self.connect.commit()
         return time_in_seconds
     
+    def update_last_send(self, time_now: datetime) -> datetime:
+        """ Update time of last shipment
+            Return: time_now """
+
+        self.cur.execute("UPDATE delay SET last_send = ?", (time_now, ))
+        self.connect.commit()
+        return time_now
+
 
 class Database(TextToSubmit, TimerForSendingMessage):
     """ Create database and CRUD all table """

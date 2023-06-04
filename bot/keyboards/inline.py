@@ -20,7 +20,7 @@ admin_menu = create_button([
 
 settings_menu = create_button([
     Button(text="Настройка текстов отправки", callback_data="settings_database_text"),
-    Button(text="Настройка задержки", callback_data="settings_timeout"),
+    Button(text="Настройка задержки", callback_data="settings_delay"),
     Button(text="Назад", callback_data="start_menu"),
 ])
 
@@ -33,4 +33,9 @@ settings_text_menu = create_button([
 after_edit = create_button([
     Button(text="Изменит/Все текста", callback_data="edit_texts"),
     Button(text="Вернуться", callback_data="settings_database_text"),
+])
+
+settings_delay_menu = create_button([
+    Button(text='Изменить', callback_data='edit_delay'),
+    Button(text='Назад', callback_data='open_settings')
 ])

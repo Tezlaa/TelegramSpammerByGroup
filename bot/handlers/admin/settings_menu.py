@@ -2,6 +2,7 @@ from aiogram import Dispatcher, types
 
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from numpy import delete
 
 from bot.types import Button
 from bot.keyboards import inline
@@ -15,12 +16,36 @@ class UpdateTextInDatabase(StatesGroup):
 
 class AddTextInDatabase(StatesGroup):
     text_to_database = State()
+    
+    
+class UpdateDelayInDatabase(StatesGroup):
+    delay_in_minute = State()
 
 
 async def open_settings(call: types.CallbackQuery) -> None:
     await call.message.delete()
     await call.message.answer('Настройка', reply_markup=inline.settings_menu)
+
+
+async def settings_delay_menu(call: types.CallbackQuery) -> None:
+    delay = database.get_delay()
+    await call.message.delete()
+    await call.message.answer(f'Задержа: <b>{round(delay.delay_in_second / 60 / 60, 2)}</b> час.\n\n'
+                              f'Последняя отправка: \n<b>{delay.last_send.strftime("%d-%m-%Y %H:%M:%S")}</b>',
+                              reply_markup=inline.settings_delay_menu)
     
+
+async def edit_delay(call: types.CallbackQuery) -> None:
+    await call.message.delete()
+    await call.message.answer('Напишите время в минутах:')
+    await UpdateDelayInDatabase.delay_in_minute.set()
+
+
+async def update_delay_in_database(msg: types.Message, state: FSMContext) -> None:
+    database.update_delay(int(msg.text.strip()) * 60)
+    await state.finish()
+    await msg.reply('Успешно добавленно', reply_markup=inline.settings_menu)
+
 
 async def settings_database_text_menu(call: types.CallbackQuery) -> None:
     await call.message.delete()
@@ -85,13 +110,17 @@ async def del_from_database(call: types.CallbackQuery) -> None:
 
 def register_admin_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(open_settings, text='open_settings')
+    
+    dp.register_callback_query_handler(settings_delay_menu, text='settings_delay')
+    dp.register_callback_query_handler(edit_delay, text='edit_delay')
+    dp.register_message_handler(update_delay_in_database, state=UpdateDelayInDatabase.delay_in_minute)
+    
     dp.register_callback_query_handler(settings_database_text_menu, text='settings_database_text')
-    
     dp.register_callback_query_handler(shows_all_texts_for_edit, text='edit_texts')
-    
     dp.register_callback_query_handler(edit_text_set_id, text_contains=["edit_text__"])
     dp.register_callback_query_handler(del_from_database, text_contains=["del_from_database__"])
     dp.register_message_handler(edit_text, state=UpdateTextInDatabase.text_to_database)
-    
     dp.register_callback_query_handler(add_text, text='add_text')
     dp.register_message_handler(text_to_database, state=AddTextInDatabase.text_to_database)
+    
+    
