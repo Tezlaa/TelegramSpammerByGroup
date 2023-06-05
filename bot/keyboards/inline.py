@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup
 
-from bot.types import Button
+from bot.tools.types import Button
 from bot.keyboards.tools import create_button
 
 

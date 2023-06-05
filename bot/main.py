@@ -1,13 +1,19 @@
+import asyncio
+
 from aiogram.utils import executor
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-from bot.handlers.register import register_all_handlers
-
 import bot.settings as settings
+from bot.handlers.register import register_all_handlers
+from bot.tools.utils import start_sending_message
 
 
 async def __on_start_up(dp: Dispatcher) -> None:
+    database = settings.database
+    if database.get_sending_option():
+        asyncio.create_task(start_sending_message())
+    
     register_all_handlers(dp)
 
 

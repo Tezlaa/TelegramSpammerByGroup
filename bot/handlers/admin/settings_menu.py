@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from numpy import delete
 
-from bot.types import Button
+from bot.tools.types import Button
 from bot.keyboards import inline
 from bot.keyboards.tools import create_button
 from bot.settings import database

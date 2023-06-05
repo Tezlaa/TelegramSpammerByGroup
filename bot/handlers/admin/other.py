@@ -16,7 +16,7 @@ async def start(msg_call: types.Message | types.CallbackQuery):
         if str(msg_call.from_id) not in settings.ADMINS_ID:
             return
     
-    await msg_call.answer('Админ Панель', reply_markup=admin_menu)
+    await msg_call.answer('Админ панель', reply_markup=admin_menu)
 
 
 def register_admin_other_handlers(dp: Dispatcher):

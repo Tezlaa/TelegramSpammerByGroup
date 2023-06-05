@@ -3,7 +3,7 @@ import sqlite3
 import logging
 from datetime import datetime
 
-from bot.types import TextFromDatabase, DelayFromDatabase
+from bot.tools.types import TextFromDatabase, DelayFromDatabase
 
 
 class DatabaseConfig:
@@ -66,7 +66,7 @@ class TextToSubmit(DatabaseConfig):
         self.cur.execute(f"DELETE FROM telegram_spammer WHERE id={id}")
         self.connect.commit()
         return id
-    
+
 
 class TimerForSendingMessage(DatabaseConfig):
     def create_delay_database(self) -> None:
@@ -104,10 +104,37 @@ class TimerForSendingMessage(DatabaseConfig):
         return time_now
 
 
-class Database(TextToSubmit, TimerForSendingMessage):
+class SettingsBot(DatabaseConfig):
+    def create_settings_database(self) -> None:
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS settings(
+            sending INTEGER)""")
+        
+        if not self.cur.execute("SELECT 1 FROM settings").fetchone():
+            self.cur.execute("INSERT INTO settings VALUES (?)", (0, ))
+            
+        self.connect.commit()
+
+    def get_sending_option(self) -> bool:
+        """ Get sending option
+            Return: True - enable sending
+                    False - disable sending"""
+                    
+        return True if self.cur.execute("SELECT 1 FROM settings").fetchone()[0] else False
+
+    def update_sending_option(self, sending: bool = True) -> bool:
+        """ Enable or disable the sending option
+            Return: sending"""
+            
+        self.cur.execute("UPDATE settings SET VALUES(?)", (1 if sending else 0, ))
+        self.connect.commit()
+        return sending
+
+
+class Database(SettingsBot, TextToSubmit, TimerForSendingMessage):
     """ Create database and CRUD all table """
     def __init__(self, database_name: str) -> None:
         super().__init__(database_name)
         
         self.create_main_database()
+        self.create_settings_database()
         self.create_delay_database()

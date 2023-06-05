@@ -4,7 +4,7 @@ from aiogram.types import (
     InlineKeyboardMarkup, InlineKeyboardButton
 )
 
-from bot.types import Button
+from bot.tools.types import Button
 
 
 def create_button(setup: List[Button], row_width: int = 1) -> InlineKeyboardMarkup:
