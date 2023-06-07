@@ -119,7 +119,7 @@ class SettingsBot(DatabaseConfig):
             Return: True - enable sending
                     False - disable sending"""
                     
-        return True if self.cur.execute("SELECT 1 FROM settings").fetchone()[0] else False
+        return True if self.cur.execute("SELECT * FROM settings").fetchone()[0] else False
 
     def update_sending_option(self, sending: bool = True) -> bool:
         """ Enable or disable the sending option

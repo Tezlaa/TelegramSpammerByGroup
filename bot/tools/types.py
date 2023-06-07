@@ -16,4 +16,8 @@ class DelayFromDatabase(BaseModel):
 class Button(BaseModel):
     text: str
     callback_data: str
-    
+
+
+class Dialogs(BaseModel):
+    name: str
+    id: int
