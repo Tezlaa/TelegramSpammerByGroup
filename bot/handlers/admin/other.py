@@ -5,7 +5,8 @@ from bot.keyboards.inline import admin_menu
 
 
 async def start(msg_call: types.Message | types.CallbackQuery):
-
+    """ Take Message or Callback """
+    
     if isinstance(msg_call, types.CallbackQuery):
         if str(msg_call.from_user.id) not in settings.ADMINS_ID:
             return

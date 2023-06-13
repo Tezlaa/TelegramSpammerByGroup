@@ -15,5 +15,4 @@ PHONE_NUMBER = env.str('PHONE_NUMBER')
 
 DIALOGS_ID = env.list('DIALOGS_ID')
 
-
 database = Database('BotDatabase.db')
